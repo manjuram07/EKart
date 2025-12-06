@@ -2,6 +2,9 @@ package com.infy.ekart.customer.api;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +54,7 @@ public class CustomerAPI {
 	@PostMapping(value = "/login")
 	public ResponseEntity<CustomerDTO> authenticateCustomer(@Valid @RequestBody CustomerDTO customerDTO)
 			throws EKartCustomerException {
-
+		
 		logger.info("CUSTOMER TRYING TO LOGIN, VALIDATING CREDENTIALS. CUSTOMER EMAIL ID: " + customerDTO.getEmailId());
 		CustomerDTO customerDTOFromDB = customerService.authenticateCustomer(customerDTO.getEmailId(),
 				customerDTO.getPassword());
@@ -129,7 +132,7 @@ public class CustomerAPI {
 		// template is already in config file
 		
 		String productAddedToCartMessage = webClient.get()
-																							.uri("http://localhost:3335/customercart-api/products")
+																							.uri("http://CartMS/Ekart/customercart-api/products")
 																							.retrieve() 
 																							.bodyToMono(String.class)  // Parse the response as String
 																							.block(); // Block for synchronous execution (necessary for ResponseEntity)
