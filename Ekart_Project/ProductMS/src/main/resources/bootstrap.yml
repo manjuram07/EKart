@@ -16,3 +16,16 @@ spring:
         data-key: data
         profileSeparator: '::'
         format: YAML
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ProductMS:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 10000
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
