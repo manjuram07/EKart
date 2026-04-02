@@ -4,9 +4,9 @@ import java.security.NoSuchAlgorithmException;
 
 import java.util.List;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
