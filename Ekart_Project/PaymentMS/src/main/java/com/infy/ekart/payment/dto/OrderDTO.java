@@ -1,8 +1,9 @@
 package com.infy.ekart.payment.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDateTime;
 
-import javax.validation.constraints.NotNull;
 
 public class OrderDTO {
 	@NotNull(message = "{transaction.orderid.notpresent}")

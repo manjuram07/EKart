@@ -36,6 +36,7 @@ public class CustomerCartServiceImpl implements CustomerCartService {
 	@Autowired
 	private WebClient webClient;
 
+
     // this method adds new products in to the customer cart
     @Override
     public Integer addProductToCart(CustomerCartDTO customerCartDTO) throws EKartCustomerCartException {
@@ -108,7 +109,7 @@ for (CartProductDTO cartProductDTO : cartProductsDTO) {
 
 			ProductDTO productDTO = webClient.get()
 //																			.uri("http://localhost:3334/product-api/product/" + cartProductDTO.getProduct().getProductId())
-																			.uri("http://ProductMS/Ekart/product-api/product/" + cartProductDTO.getProduct().getProductId())
+																			.uri("http://localhost:3334/Ekart/product-api/product/" + cartProductDTO.getProduct().getProductId())
 																			.retrieve()
 																			.bodyToMono(ProductDTO.class)
 																			.block();		// synchronous because we used block()
@@ -203,6 +204,31 @@ for (CartProductDTO cartProductDTO : cartProductsDTO) {
 	    // Log or handle the exception gracefully
 	    System.err.println("Fallback triggered due to: " + t.getMessage());
 
-	    return Collections.emptySet(); // or return cached/stale data
+	    // Return cart products with productId only, without fetching details from ProductMS
+	    try {
+	        Optional<CustomerCart> cartOptional = customerCartRepository.findByCustomerEmailId(customerEmailId);
+	        Set<CartProductDTO> cartProductsDTO = new HashSet<>();
+	        CustomerCart cart = cartOptional
+	                .orElseThrow(() -> new EKartCustomerCartException("CustomerCartService.NO_CART_FOUND"));
+
+	        if (cart.getCartProducts().isEmpty()) {
+	            throw new EKartCustomerCartException("CustomerCartService.NO_PRODUCT_ADDED_TO_CART");
+	        }
+	        Set<CartProduct> cartProducts = cart.getCartProducts();
+	        for (CartProduct cartProduct : cartProducts) {
+	            CartProductDTO cartProductDTO = new CartProductDTO();
+	            cartProductDTO.setCartProductId(cartProduct.getCartProductId());
+	            cartProductDTO.setQuantity(cartProduct.getQuantity());
+	            ProductDTO productDTO = new ProductDTO();
+	            productDTO.setProductId(cartProduct.getProductId());
+	            // Set other fields to null or default, since we can't fetch
+	            cartProductDTO.setProduct(productDTO);
+	            cartProductsDTO.add(cartProductDTO);
+	        }
+	        return cartProductsDTO;
+	    } catch (EKartCustomerCartException e) {
+	        // If cart not found, return empty
+	        return Collections.emptySet();
+	    }
 	}
 }

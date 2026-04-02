@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +49,9 @@ public class CustomerAPI {
 
 	@Autowired
 	private Environment environment;
+
+	@Value("${CustomerAPI.productAPIBaseURL}")
+	private String productAPIBaseURL;
 
 	static Log logger = LogFactory.getLog(CustomerAPI.class);
 
@@ -113,7 +117,7 @@ public class CustomerAPI {
 			// template to make call to the Product API
 			
 			ProductDTO productDTO = webClient.get()
-																			.uri("http://localhost:3334/product-api/product/" + cartProductDTO.getProduct().getProductId())
+																			.uri("productAPIBaseURL" + cartProductDTO.getProduct().getProductId())
 																			.retrieve()
 																			.bodyToMono(ProductDTO.class)
 																			.block();

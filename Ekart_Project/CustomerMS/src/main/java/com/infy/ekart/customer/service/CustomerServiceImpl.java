@@ -10,6 +10,7 @@ import com.infy.ekart.customer.dto.CustomerDTO;
 import com.infy.ekart.customer.entity.Customer;
 import com.infy.ekart.customer.exception.EKartCustomerException;
 import com.infy.ekart.customer.repository.CustomerRepository;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service(value = "customerService")
 @Transactional
@@ -17,8 +18,9 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Autowired
 	private CustomerRepository customerRepository;
-	
-	
+
+	@Autowired
+	private WebClient webClient;
 	
 
 	

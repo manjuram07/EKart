@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.transaction.Transactional;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +32,12 @@ public class PaymentServiceImpl implements PaymentService {
 	private TransactionRepository transactionRepository;
 
 	@Override
-	public Integer addCustomerCard(String customerEmailId, CardDTO cardDTO)
-			throws EKartPaymentException, NoSuchAlgorithmException {
+	public Integer addCustomerCard(String customerEmailId, CardDTO cardDTO) throws EKartPaymentException, NoSuchAlgorithmException {
 
 		List<Card> listOfCustomerCards = cardRepository.findByCustomerEmailId(customerEmailId);
-		if (listOfCustomerCards.isEmpty())
+		if (listOfCustomerCards.isEmpty()) {
 			throw new EKartPaymentException("PaymentService.CUSTOMER_NOT_FOUND");
+		}
 		cardDTO.setHashCvv(HashingUtility.getHashValue(cardDTO.getCvv().toString()));
 		Card newCard = new Card();
 		newCard.setCardId(cardDTO.getCardId());
@@ -74,9 +74,9 @@ public class PaymentServiceImpl implements PaymentService {
 
 		System.out.println(cardRepository);
 		List<Card> listOfCustomerCards = cardRepository.findByCustomerEmailId(customerEmailId);
-		if (listOfCustomerCards.isEmpty())
+		if (listOfCustomerCards.isEmpty()) {
 			throw new EKartPaymentException("PaymentService.CUSTOMER_NOT_FOUND");
-
+		}
 		Optional<Card> optionalCards = cardRepository.findById(cardId);
 		Card card = optionalCards.orElseThrow(() -> new EKartPaymentException("PaymentService.CARD_NOT_FOUND"));
 		cardRepository.delete(card);
@@ -102,8 +102,7 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
-	public List<CardDTO> getCustomerCardOfCardType(String customerEmailId, String cardType)
-			throws EKartPaymentException {
+	public List<CardDTO> getCustomerCardOfCardType(String customerEmailId, String cardType) throws EKartPaymentException {
 
 		List<Card> cards = cardRepository.findByCustomerEmailIdAndCardType(customerEmailId, cardType);
 
@@ -129,8 +128,7 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
-	public Integer addTransaction(TransactionDTO transactionDTO)
-			throws EKartPaymentException, PayOrderFallbackException {
+	public Integer addTransaction(TransactionDTO transactionDTO) throws EKartPaymentException, PayOrderFallbackException {
 		if (transactionDTO.getTransactionStatus().equals(TransactionStatus.TRANSACTION_FAILED)) {
 			throw new PayOrderFallbackException("Payment.TRANSACTION_FAILED_CVV_NOT_MATCHING");
 		}
@@ -153,7 +151,6 @@ public class PaymentServiceImpl implements PaymentService {
 			throws EKartPaymentException, NoSuchAlgorithmException {
 		if (!transactionDTO.getOrder().getCustomerEmailId().equals(customerEmailId)) {
 			throw new EKartPaymentException("PaymentService.ORDER_DOES_NOT_BELONGS");
-
 		}
 
 		if (!transactionDTO.getOrder().getOrderStatus().equals("PLACED")) {
@@ -162,18 +159,14 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 		CardDTO cardDTO = getCard(transactionDTO.getCard().getCardId());
 		if (!cardDTO.getCustomerEmailId().matches(customerEmailId)) {
-
 			throw new EKartPaymentException("PaymentService.CARD_DOES_NOT_BELONGS");
 		}
 		if (!cardDTO.getCardType().equals(transactionDTO.getOrder().getPaymentThrough())) {
-
 			throw new EKartPaymentException("PaymentService.PAYMENT_OPTION_SELECTED_NOT_MATCHING_CARD_TYPE");
 		}
 		if (cardDTO.getHashCvv().equals(HashingUtility.getHashValue(transactionDTO.getCard().getCvv().toString()))) {
-
 			transactionDTO.setTransactionStatus(TransactionStatus.TRANSACTION_SUCCESS);
 		} else {
-
 			transactionDTO.setTransactionStatus(TransactionStatus.TRANSACTION_FAILED);
 
 		}
