@@ -2,7 +2,7 @@ server:
   port: 3335
 spring:
   application:
-    name: CartMS
+    name: Cart-service
   cloud:
     consul:
       host: localhost
@@ -35,10 +35,11 @@ management:
     health:
       show-details: always
 
+# Circuit Breaker configuration for Cart-service
 resilience4j:
   circuitbreaker:
     instances:
-      ProductMS:
+      Cart-service:
         registerHealthIndicator: true
         eventConsumerBufferSize: 10
         failureRateThreshold: 60
@@ -48,3 +49,20 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 2
         slidingWindowSize: 10
         slidingWindowType: COUNT_BASED
+
+
+# Retry configuration for Cart-service
+resilience4j.retry:
+  instances:
+    Cart-service:
+      max-attempts: 3
+      wait-duration: 10s
+
+
+# Rate Limiter configuration for Cart-service
+resilience4j.ratelimiter:
+    instances:
+        Cart-service:
+            limitForPeriod: 5
+            limitRefreshPeriod: 1s
+            timeoutDuration: 0s
