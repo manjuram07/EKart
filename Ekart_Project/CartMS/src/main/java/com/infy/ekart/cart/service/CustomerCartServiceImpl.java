@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +79,7 @@ public class CustomerCartServiceImpl implements CustomerCartService {
 
     // this method retrieves customer data from repository and returns cart details
     // of that customer
+    @Retry(name = "ProductMS", fallbackMethod = "fallbackGetProductsFromCart")
 	@CircuitBreaker(name = "ProductMS", fallbackMethod = "fallbackGetProductsFromCart")
     @Override
     public Set<CartProductDTO> getProductsFromCart(String customerEmailId) throws EKartCustomerCartException {
