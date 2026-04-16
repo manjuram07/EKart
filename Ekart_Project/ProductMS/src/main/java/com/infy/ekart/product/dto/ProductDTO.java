@@ -1,5 +1,8 @@
 package com.infy.ekart.product.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 public class ProductDTO {
 	
 	private Integer productId;
@@ -7,6 +10,8 @@ public class ProductDTO {
 	private String description;
 	private String category;
 	private String brand;
+	@NotNull
+	@Positive
 	private Double price;
 	private Integer availableQuantity;
 	
