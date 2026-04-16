@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 
 
 @Entity
-@Table(name="EK_PRODUCT")
+@Table(
+		name="EK_PRODUCT",
+		indexes = {
+				@Index(name = "idx_product_name", columnList = "name")
+		}
+)
 public class Product {
 	
 	@Id
