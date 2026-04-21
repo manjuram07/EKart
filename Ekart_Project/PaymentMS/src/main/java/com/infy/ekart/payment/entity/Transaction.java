@@ -1,15 +1,8 @@
 package com.infy.ekart.payment.entity;
 import java.time.LocalDateTime;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
 import com.infy.ekart.payment.dto.TransactionStatus;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name="EK_TRANSACTION")

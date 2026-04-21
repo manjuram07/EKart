@@ -1,34 +1,40 @@
 package com.infy.ekart.payment.service;
 
-
+import com.infy.ekart.payment.dto.TransactionStatus;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.github.resilience4j.retry.annotation.Retry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.infy.ekart.payment.dto.TransactionStatus;
-
 @Service
 public class PaymentCircuitBreakerService {
-		
-//	@Autowired
-//	private RestTemplate template;
 
-	@Autowired
-	private WebClient webClient; 
-	
-	// Add necessary CircuitBreaker annotation
-	@CircuitBreaker(name="paymentService", fallbackMethod = "paymentFailed")
-	public void updateOrderAfterPayment(Integer orderId, String transactionStatus) {
-//		template.put("http://customerMS/Ekart/customerorder-api/order/"+orderId+"/update/order-status", transactionStatus);
-		
-		webClient.put()
-						.uri("http://customerMS/Ekart/customerorder-api/order/"+orderId+"/update/order-status")
-						.retrieve()
-						.bodyToMono(TransactionStatus.class);
+	private static final Logger log = LoggerFactory.getLogger(PaymentCircuitBreakerService.class);
+
+	private final WebClient webClient;
+
+	@Value("${customer-service.base-url}")
+	private String customerServiceBaseUrl;
+
+	public PaymentCircuitBreakerService(WebClient webClient) {
+		this.webClient = webClient;
 	}
 
-	public String paymentFailed(Exception ex){
-		return "Payment Failed: "+ex.getMessage();
+	@CircuitBreaker(name = "paymentService", fallbackMethod = "paymentFailed")
+	@Retry(name = "paymentService")
+	public void updateOrderAfterPayment(Integer orderId, String transactionStatus) {
+		webClient.put()
+				.uri(customerServiceBaseUrl + "/order/" + orderId + "/update/order-status")
+				.retrieve()
+				.bodyToMono(TransactionStatus.class)
+				.block(); // ← subscribes and triggers the actual HTTP call
+	}
+
+	public void paymentFailed(Integer orderId, String transactionStatus, Exception ex) {
+		log.warn("Fallback: could not update order {} with status {}. Cause: {}",
+				orderId, transactionStatus, ex.getMessage());
 	}
 }

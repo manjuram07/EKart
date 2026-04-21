@@ -5,24 +5,19 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 
+import com.infy.ekart.payment.service.KafkaProducerService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -54,6 +49,15 @@ public class PaymentAPI {
 
 	private static final Log logger = LogFactory.getLog(PaymentAPI.class);
 
+	@Autowired
+	private KafkaProducerService producer;
+
+	@PostMapping("/publish")
+	public String publish(@RequestParam String message) {
+		logger.info("Publishing message to Kafka topic: " + message);
+		producer.sendMessage("my-topic", message);
+		return "Message sent: " + message;
+	}
 
 	@PostMapping(value = "/customer/{customerEmailId:.+}/cards")
 	public ResponseEntity<String> addNewCard(@RequestBody CardDTO cardDTO,
@@ -65,7 +69,7 @@ public class PaymentAPI {
 		cardId = paymentService.addCustomerCard(customerEmailId, cardDTO);
 		String message = environment.getProperty("PaymentAPI.NEW_CARD_ADDED_SUCCESS");
 		String toReturn = message + cardId;
-		toReturn = toReturn.trim();
+//		toReturn = toReturn.trim();
 		return new ResponseEntity<>(toReturn, HttpStatus.OK);
 
 	}
